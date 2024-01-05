@@ -5,14 +5,14 @@ from django.forms import FileInput, CheckboxInput, forms
 from django.template import loader
 from django.templatetags.static import static
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy
+from django.utils.translation import gettext_lazy
 
 from admin_async_upload.storage import ResumableStorage
 
 
 class ResumableBaseWidget(FileInput):
     template_name = 'admin_resumable/admin_file_input.html'
-    clear_checkbox_label = ugettext_lazy('Clear')
+    clear_checkbox_label = gettext_lazy('Clear')
 
     def render(self, name, value, attrs=None, **kwargs):
         persistent_storage = ResumableStorage().get_persistent_storage()
@@ -33,6 +33,8 @@ class ResumableBaseWidget(FileInput):
         simultaneous_uploads = getattr(settings, 'ADMIN_SIMULTANEOUS_UPLOADS', 3)
 
         content_type_id = ContentType.objects.get_for_model(self.attrs['model']).id
+        instance = self.attrs.get('instance')
+        instance_id = instance.pk if instance else None
 
         context = {
             'name': name,
@@ -42,6 +44,7 @@ class ResumableBaseWidget(FileInput):
             'show_thumb': show_thumb,
             'field_name': self.attrs['field_name'],
             'content_type_id': content_type_id,
+            'instance_id': instance_id,
             'file_url': file_url,
             'file_name': file_name,
             'simultaneous_uploads': simultaneous_uploads,
